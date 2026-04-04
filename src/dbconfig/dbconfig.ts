@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import "reflect-metadata";
 import { DataSource } from "typeorm";
+import dns from 'dns';
 
 // Parse DATABASE_URL to extract connection details
 const databaseUrl = process.env.DATABASE_URL;
@@ -32,5 +33,8 @@ export const AppDataSource = new DataSource({
   extra: {
     max: 3,          // 🔥 reduce connections (Supabase free tier)
     family: 4,       // 🔥 force IPv4 (fix ENETUNREACH)
+    lookup: (hostname: string, options: any, callback: any) => {
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
   },
 });

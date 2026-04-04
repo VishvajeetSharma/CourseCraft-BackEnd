@@ -65,11 +65,11 @@ const PORT = process.env.PORT || 6000;
 AppDataSource.initialize()
   .then(() => {
     console.log("✅ DB Connected");
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
   })
   .catch((err) => {
     console.log("❌ DB Error:", err.message);
+    process.exit(1);
   });
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
