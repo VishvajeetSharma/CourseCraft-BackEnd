@@ -2,23 +2,21 @@ import 'dotenv/config'
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 
-// export const AppDataSource = new DataSource({
-//   type: "postgres",
-//   host: process.env.DB_HOST || "localhost",
-//   port: Number(process.env.DB_PORT) || 5432,
-//   username: process.env.DB_USER || "postgres",
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_NAME,
-//   synchronize: process.env.NODE_ENV !== "production",
-//   logging: process.env.NODE_ENV === "development",
-//   entities: ["src/entities/**/*.ts"],
-//   migrations: ["src/migrations/**/*.ts"],
-// });
+// Parse DATABASE_URL to extract connection details
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl) {
+  throw new Error("DATABASE_URL is not defined");
+}
 
+const url = new URL(databaseUrl);
 
 export const AppDataSource = new DataSource({ 
   type: "postgres",
-  url: process.env.DATABASE_URL,
+  host: url.hostname,
+  port: Number(url.port) || 5432,
+  username: url.username,
+  password: url.password,
+  database: url.pathname.slice(1), // Remove leading '/'
 
   ssl: {
     rejectUnauthorized: false,
