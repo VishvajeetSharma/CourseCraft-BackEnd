@@ -48,15 +48,28 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 
 const PORT = process.env.PORT || 6000;
 
+// AppDataSource.initialize()
+//   .then(() => {
+//     console.log("Database connected successfully..");
+//     app.listen(PORT, () => {
+//       console.log(`Server running on port: ${PORT}`);
+//       console.log(`Swagger UI: http://localhost:${PORT}/api-docs/`);
+//     });
+//   })
+//   .catch((err) => {
+//     console.error("Database connection failed:", err);
+//     process.exit(1);
+//   });
+
+
 AppDataSource.initialize()
   .then(() => {
-    console.log("Database connected successfully..");
-    app.listen(PORT, () => {
-      console.log(`Server running on port: ${PORT}`);
-      console.log(`Swagger UI: http://localhost:${PORT}/api-docs/`);
-    });
+    console.log("✅ DB Connected");
   })
   .catch((err) => {
-    console.error("Database connection failed:", err);
-    process.exit(1);
+    console.log("❌ DB Error:", err.message);
   });
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on port ${PORT}`);
+});
