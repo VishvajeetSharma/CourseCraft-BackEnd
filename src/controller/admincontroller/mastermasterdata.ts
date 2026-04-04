@@ -3,260 +3,139 @@ import { masterplan } from "../../entities/masterplan";
 import { users } from "../../entities/user";
 import { createResponse } from "../../helpers/createResponse";
 import { uploadFile } from "../../helpers/fileUpload";
+import { asyncHandler } from "../../helpers/asyncHandler";
 
+// Master Plans
+export const createmasterplan = asyncHandler(async (req, res) => {
+  const { name, desc, credit, price, offer, duration, is_rec, status } = req.body;
+  const isExist = await masterplan.findOne({ where: { name } });
+  if (isExist) return createResponse(res, false, 400, "Plan already exists", [], true);
 
-// Master Plans 
-export const createmasterplan = async (req: any, res: any) => {
-  try {
-    const { name, desc, credit, price, offer, duration, is_rec, status } = req.body;
-    const isExist = await masterplan.findOne({ where: { name } });
-    if (isExist) {
-      return createResponse(res, false, 400, "Plan already exists", [], true);
-    }
-    const result = await masterplan.save({ name, desc, credit, price, offer, duration, is_rec, status });
-    return createResponse(res, true, 200, "Plan created successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
+  const result = await masterplan.save({ name, desc, credit, price, offer, duration, is_rec, status });
+  return createResponse(res, true, 200, "Plan created successfully", result, false);
+});
+
+export const getmasterplan = asyncHandler(async (_req, res) => {
+  const result = await masterplan.find({ order: { created_at: "DESC" } });
+  return createResponse(res, true, 200, "Plans fetched successfully", result, false);
+});
+
+export const getmasterplanbyid = asyncHandler(async (req, res) => {
+  const result = await masterplan.findOne({ where: { id: req.params.id } });
+  if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
+  return createResponse(res, true, 200, "Plan fetched successfully", result, false);
+});
+
+export const updatemasterplan = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await masterplan.findOne({ where: { id } });
+  if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
+
+  const { name, desc, credit, price, offer, duration, is_rec, status } = req.body;
+  await masterplan.update({ id }, { name, desc, credit, price, offer, duration, is_rec, status });
+  const updatedResult = await masterplan.findOne({ where: { id } });
+  return createResponse(res, true, 200, "Plan updated successfully", updatedResult, false);
+});
+
+export const deletemasterplan = asyncHandler(async (req, res) => {
+  const result = await masterplan.findOne({ where: { id: req.params.id } });
+  if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
+
+  await masterplan.delete({ id: req.params.id });
+  return createResponse(res, true, 200, "Plan deleted successfully", result, false);
+});
+
+// Master Course
+export const createmastercourse = asyncHandler(async (req, res) => {
+  const { title, desc, level, rating, duration, type, status } = req.body;
+
+  if (!req.files?.thumbnail || !req.files?.content) {
+    return createResponse(res, false, 400, "Thumbnail and Content required", [], true);
   }
-};
 
-export const getmasterplan = async (req: any, res: any) => {
-  try {
-    const result = await masterplan.find({ order: {created_at: "DESC", } });
-    return createResponse(res, true, 200, "Plans fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+  const isExist = await mastercourse.findOne({ where: { title } });
+  if (isExist) return createResponse(res, false, 400, "Course already exists", [], true);
 
-export const getmasterplanbyid = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const result = await masterplan.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Plan not found", [], true);
-    }
-    return createResponse(res, true, 200, "Plan fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+  const [thumbName, contentName] = await Promise.all([
+    uploadFile(req.files.thumbnail, "uploads"),
+    uploadFile(req.files.content, "uploads"),
+  ]);
 
-export const updatemasterplan = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const { name, desc, credit, price, offer, duration, is_rec, status } = req.body;
-    const result = await masterplan.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Plan not found", [], true);
-    }
-    await masterplan.update({ id }, { name, desc, credit, price, offer, duration, is_rec, status });
-    const updatedResult = await masterplan.findOne({ where: { id } });
-    return createResponse(res, true, 200, "Plan updated successfully", updatedResult, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+  const result = await mastercourse.save({ title, desc, level, rating, duration, type, status, thumbnail: thumbName, content: contentName });
+  return createResponse(res, true, 200, "Course created successfully", result, false);
+});
 
-export const deletemasterplan = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const result = await masterplan.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Plan not found", [], true);
-    }
-    await masterplan.delete({ id });
-    return createResponse(res, true, 200, "Plan deleted successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+export const getmastercourse = asyncHandler(async (_req, res) => {
+  const result = await mastercourse.find({ order: { created_at: "DESC" } });
+  return createResponse(res, true, 200, "Courses fetched successfully", result, false);
+});
 
+export const getmastercoursebyid = asyncHandler(async (req, res) => {
+  const result = await mastercourse.findOne({ where: { id: req.params.id } });
+  if (!result) return createResponse(res, false, 404, "Course not found", [], true);
+  return createResponse(res, true, 200, "Course fetched successfully", result, false);
+});
 
+export const updatemastercourse = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const result = await mastercourse.findOne({ where: { id } });
+  if (!result) return createResponse(res, false, 404, "Course not found", [], true);
 
+  const { title, desc, level, rating, duration, type, status } = req.body;
 
-// Master Course 
-export const createmastercourse = async (req: any, res: any) => {
-  try {
-    const { title, desc, level, rating, duration, type, status } = req.body;
+  const [thumbnailName, contentName] = await Promise.all([
+    req.files?.thumbnail ? uploadFile(req.files.thumbnail, "uploads") : Promise.resolve(result.thumbnail),
+    req.files?.content ? uploadFile(req.files.content, "uploads") : Promise.resolve(result.content),
+  ]);
 
-    if (!req.files || !req.files.thumbnail || !req.files.content) {
-      return createResponse(res, false, 400, "Thumbnail and Content required", [], true);
-    }
+  await mastercourse.update({ id }, { title, desc, level, rating, duration, type, status, thumbnail: thumbnailName, content: contentName });
+  const updatedResult = await mastercourse.findOne({ where: { id } });
+  return createResponse(res, true, 200, "Course updated successfully", updatedResult, false);
+});
 
-    const thumbnail = req.files.thumbnail;
-    const content = req.files.content;
-     
-    uploadFile(thumbnail, "uploads", (err, thumbName) => {
-      if (err) {
-        return createResponse(res, false, 500, err, [], true);
-      }
+export const deletemastercourse = asyncHandler(async (req, res) => {
+  const result = await mastercourse.findOne({ where: { id: req.params.id } });
+  if (!result) return createResponse(res, false, 404, "Course not found", [], true);
 
-      uploadFile(content, "uploads", async (err2, contentName) => {
-        if (err2) {
-          return createResponse(res, false, 500, err2, [], true);
-        }
+  await mastercourse.delete({ id: req.params.id });
+  return createResponse(res, true, 200, "Course deleted successfully", result, false);
+});
 
-      try {
-        const isExist = await mastercourse.findOne({ where: { title } });
+// Users
+export const getUsers = asyncHandler(async (_req, res) => {
+  const result = await users.find({ order: { created_at: "DESC" } });
+  return createResponse(res, true, 200, "Users fetched successfully", result, false);
+});
 
-        if (isExist) {
-          return createResponse(res, false, 400, "Course already exists", [], true);
-        }
+export const deleteUser = asyncHandler(async (req, res) => {
+  const result = await users.findOne({ where: { id: req.params.id } });
+  if (!result) return createResponse(res, false, 404, "User not found", [], true);
 
-        const result = await mastercourse.save({ title, desc, level, rating, duration,  type, status, thumbnail: thumbName, content: contentName, });
+  await users.delete({ id: req.params.id });
+  return createResponse(res, true, 200, "User deleted successfully", result, false);
+});
 
-        return createResponse(res, true, 200, "Course created successfully", result, false);
-      } catch (error: any) {
-        return createResponse(res, false, 500, error.message, [], true);
-      }
-      });
-    });
+export const getDashboardStats = asyncHandler(async (_req, res) => {
+  const [totalUsers, activeUsers, totalPlans, activePlans, totalCourses, activeCourses] = await Promise.all([
+    users.count(),
+    users.count({ where: { status: 1 } }),
+    masterplan.count(),
+    masterplan.count({ where: { status: 1 } }),
+    mastercourse.count(),
+    mastercourse.count({ where: { status: 1 } }),
+  ]);
 
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message, [], true);
-  }
-};
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const graphData = months.map((month) => ({
+    name: month,
+    users: Math.floor(Math.random() * 100),
+    courses: Math.floor(Math.random() * 20),
+  }));
 
-export const getmastercourse = async (req: any, res: any) => {
-  try {
-    const result = await mastercourse.find({ order: {created_at: "DESC", } });
-    return createResponse(res, true, 200, "Courses fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-export const getmastercoursebyid = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const result = await mastercourse.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Course not found", [], true);
-    }
-    return createResponse(res, true, 200, "Course fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-export const updatemastercourse = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const { title, desc, level, rating, duration, type, status } = req.body;
-    const result = await mastercourse.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Course not found", [], true);
-    }
-
-    let thumbnailName = result.thumbnail;
-    let contentName = result.content;
-
-    const handleUploads = async () => {
-      if (req.files && req.files.thumbnail) {
-        await new Promise((resolve, reject) => {
-          uploadFile(req.files.thumbnail, "uploads", (err, name) => {
-            if (err) reject(err);
-            else {
-              thumbnailName = name;
-              resolve(name);
-            }
-          });
-        });
-      }
-
-      if (req.files && req.files.content) {
-        await new Promise((resolve, reject) => {
-          uploadFile(req.files.content, "uploads", (err, name) => {
-            if (err) reject(err);
-            else {
-              contentName = name;
-              resolve(name);
-            }
-          });
-        });
-      }
-    };
-
-    await handleUploads();
-
-    await mastercourse.update(
-      { id },
-      { title, desc, level, rating, duration, type, status, thumbnail: thumbnailName, content: contentName }
-    );
-    const updatedResult = await mastercourse.findOne({ where: { id } });
-    return createResponse(res, true, 200, "Course updated successfully", updatedResult, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-export const deletemastercourse = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const result = await mastercourse.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Course not found", [], true);
-    }
-    await mastercourse.delete({ id });
-    return createResponse(res, true, 200, "Course deleted successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-
-
-// Users 
-export const getUsers = async (req: any, res: any) => {
-  try {
-    const result = await users.find({ order: { created_at: "DESC" } });
-    return createResponse(res, true, 200, "Users fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-export const deleteUser = async (req: any, res: any) => {
-  try {
-    const { id } = req.params;
-    const result = await users.findOne({ where: { id } });
-    if (!result) {
-      return createResponse(res, false, 404, "Course not found", [], true);
-    }
-    await users.delete({ id });
-    return createResponse(res, true, 200, "Course deleted successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-export const getDashboardStats = async (req: any, res: any) => {
-  try {
-    const totalUsers = await users.count();
-    const activeUsers = await users.count({ where: { status: 1 } });
-
-    const totalPlans = await masterplan.count();
-    const activePlans = await masterplan.count({ where: { status: 1 } });
-
-    const totalCourses = await mastercourse.count();
-    const activeCourses = await mastercourse.count({ where: { status: 1 } });
-
-    // Mocking monthly data for the graph (can be improved with actual query)
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const graphData = months.map((month) => ({
-      name: month,
-      users: Math.floor(Math.random() * 100),
-      courses: Math.floor(Math.random() * 20),
-    }));
-
-    return createResponse(res, true, 200, "Dashboard stats fetched successfully", {
-      users: { total: totalUsers, active: activeUsers },
-      plans: { total: totalPlans, active: activePlans },
-      courses: { total: totalCourses, active: activeCourses },
-      graphData
-    }, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+  return createResponse(res, true, 200, "Dashboard stats fetched successfully", {
+    users: { total: totalUsers, active: activeUsers },
+    plans: { total: totalPlans, active: activePlans },
+    courses: { total: totalCourses, active: activeCourses },
+    graphData,
+  }, false);
+});

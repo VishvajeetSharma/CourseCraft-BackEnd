@@ -6,13 +6,14 @@ import {
   getUsers, deleteUser, getDashboardStats 
 } from '../../controller/admincontroller/mastermasterdata';
 import { validateMiddleware } from '../../middleware/validationMiddleware';
-import { verifyToken } from '../../middleware/authMiddleware';
+import { verifyToken, refreshTokenHandler } from '../../middleware/authMiddleware';
 
 const adminRouter = express.Router();
 
 // Auth Routes
 adminRouter.post("/register", validateMiddleware, adminRegister);
 adminRouter.post("/login", validateMiddleware, adminLogin);
+adminRouter.post("/refresh-token", refreshTokenHandler);
 adminRouter.post("/forget-password", adminForgetPassword);
 adminRouter.put("/update-password", verifyToken, adminUpdatePassword);
 

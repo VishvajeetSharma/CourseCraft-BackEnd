@@ -1,13 +1,14 @@
 import express from "express";
 import { userForgetPassword, userLogin, userRegister, userUpdatePassword, userUpdateProfile } from "../../controller/usercontroller/userauthcontroller";
 import { validateMiddleware } from "../../middleware/validationMiddleware";
-import { verifyToken } from "../../middleware/authMiddleware";
+import { verifyToken, refreshTokenHandler } from "../../middleware/authMiddleware";
 import { getUserDashboardStats, userPurchasedPlan, userPurchasePlan, userViewCourse } from "../../controller/usercontroller/usermastermasterdata";
 const userRouter = express.Router();
 
 // Auth
 userRouter.post("/register", validateMiddleware, userRegister);  
 userRouter.post("/login", validateMiddleware, userLogin);
+userRouter.post("/refresh-token", refreshTokenHandler);
 
 // Dashboard State
 userRouter.get("/user-state", verifyToken, getUserDashboardStats);

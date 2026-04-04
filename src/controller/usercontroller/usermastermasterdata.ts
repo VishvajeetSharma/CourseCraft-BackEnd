@@ -4,132 +4,68 @@ import { masterplan } from "../../entities/masterplan";
 import { plan } from "../../entities/plan";
 import { users } from "../../entities/user";
 import { createResponse } from "../../helpers/createResponse";
- 
+import { asyncHandler } from "../../helpers/asyncHandler";
 
-// Dashboard States
+export const getUserDashboardStats = asyncHandler(async (req, res) => {
+  const user_Id = req.user.id;
 
-export const getUserDashboardStats = async (req: any, res: any) => {
-  try {
-    const user_Id = req.user.id; // assuming auth middleware se aa raha hai
+  const [userData, totalPlans, purchasedPlans, totalCourses, userCourses] = await Promise.all([
+    users.findOne({ where: { id: user_Id } }),
+    masterplan.count(),
+    plan.count({ where: { user_id: user_Id } }),
+    mastercourse.count(),
+    course.count({ where: { user_id: user_Id } }),
+  ]);
 
-    // ===== USER RECORD =====
-    const userData = await users.findOne({
-      where: { id: user_Id }
-    });
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const chartData = months.map((month) => ({
+    name: month,
+    plans: Math.floor(Math.random() * 20),
+    courses: Math.floor(Math.random() * 10),
+  }));
 
-    // ===== TOTAL PLANS =====
-    const totalPlans = await masterplan.count();
+  return createResponse(res, true, 200, "User dashboard stats fetched successfully", {
+    user: userData,
+    stats: { totalPlans, purchasedPlans, totalCourses, userCourses, remainingCredit: userData?.credit || 0 },
+    chartData,
+  }, false);
+});
 
-    // ===== PURCHASED PLANS =====
-    const purchasedPlans = await plan.count({
-      where: { user_id: user_Id }
-    });
+export const userPurchasePlan = asyncHandler(async (req, res) => {
+  const { plan_id } = req.body;
+  const user_id = req.user.id;
 
-    // ===== TOTAL COURSES =====
-    const totalCourses = await mastercourse.count();
+  await plan.save({ user_id, plan_id });
 
-    // ===== USER COURSES (AGAR TRACK KARTE HO) =====
-    const userCourses = await course.count({
-      where: { user_id: user_Id }
-    });
+  const [masterplanRes, userRes] = await Promise.all([
+    masterplan.findOne({ where: { id: plan_id } }),
+    users.findOne({ where: { id: user_id } }),
+  ]);
 
-    // ===== REMAINING CREDIT =====
-    const remainingCredit = userData?.credit || 0;
+  const finalCredit = parseInt(masterplanRes?.credit) + parseInt(userRes?.credit);
+  await users.update({ id: user_id }, { credit: finalCredit } as any);
+  return createResponse(res, true, 200, "Plan purchased successfully", { credit: finalCredit }, false);
+});
 
-    // ===== MONTHLY TREND DATA (ADMIN STYLE) =====
-    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const chartData = months.map((month) => ({
-      name: month,
-      plans: Math.floor(Math.random() * 20),
-      courses: Math.floor(Math.random() * 10),
-    }));
+export const userPurchasedPlan = asyncHandler(async (req, res) => {
+  const user_id = req.user.id;
+  const data = await plan.createQueryBuilder("plan")
+    .leftJoinAndSelect(masterplan, "mp", "mp.id = plan.plan_id")
+    .where("plan.user_id = :user_id", { user_id })
+    .getRawMany();
 
-    return createResponse(
-      res,
-      true,
-      200,
-      "User dashboard stats fetched successfully",
-      {
-        user: userData,
-        stats: {
-          totalPlans,
-          purchasedPlans,
-          totalCourses,
-          userCourses,
-          remainingCredit
-        },
-        chartData
-      },
-      false
-    );
+  return createResponse(res, true, 200, "Plans fetched successfully", data, false);
+});
 
-  } catch (error: any) {
-    return createResponse(
-      res,
-      false,
-      500,
-      error.message || "Internal Server Error",
-      [],
-      true
-    );
+export const userViewCourse = asyncHandler(async (req, res) => {
+  const user_id = req.user.id;
+  const user = await users.findOne({ where: { id: user_id } });
+  const remainingCredit = parseInt(user?.credit);
+
+  if (remainingCredit <= 0) {
+    return createResponse(res, false, 400, "Insufficient credit, please purchase a plan", [], true);
   }
-};
 
-// Plan
-export const userPurchasePlan = async (req: any, res: any) => {
-  try {
-    const {plan_id}=req.body 
-    const user_id=req.user.id 
-    await  plan.save({user_id,plan_id})
-    const masterplanRes = await masterplan.findOne({  where:{id:plan_id}});
-    const userRes=await users.findOne({where:{id:user_id}})
-    const finalCredit:any=parseInt(masterplanRes?.credit)+parseInt(userRes?.credit);
-    await users.update({id:user_id},{credit:finalCredit})
-    return createResponse(res, true, 200, "Plans created  successfully", finalCredit, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-  
-}; 
-  
-export const userPurchasedPlan = async (req: any, res: any) => {
-  try {
-    const user_id = req.user.id;
-
-    const data = await plan.createQueryBuilder('plan')
-      .leftJoinAndSelect(masterplan, "mp", "mp.id = plan.plan_id")
-      .where("plan.user_id = :user_id", { user_id })
-      .getRawMany();
-
-    return createResponse(res, true, 200, "Plans fetched successfully", data, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
-
-// Master Course
-export const getMasterCourse = async (req: any, res: any) => {
-  try {
-    const result = await mastercourse.find({ order: {created_at: "DESC", } });
-    return createResponse(res, true, 200, "Courses fetched successfully", result, false);
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-}; 
-
-export const userViewCourse = async (req: any, res: any) => {
-  try {
-    const user_id = req.user.id;
-   const user=await users.findOne({where:{id:user_id}});
-   const remaingCredit=parseInt(user?.credit);
-   if(remaingCredit>0){
-    const final:any=remaingCredit-1
-   await users.update({id:user_id},{credit:final})
-   return createResponse(res, true, 200, "success", [], false);
-   }else{
- return createResponse(res, false, 400, "You have insufficient credit please purschase", [], true);
-   } 
-  } catch (error: any) {
-    return createResponse(res, false, 500, error.message || "Internal Server Error", [], true);
-  }
-};
+  await users.update({ id: user_id }, { credit: remainingCredit - 1 } as any);
+  return createResponse(res, true, 200, "Course accessed successfully", [], false);
+});

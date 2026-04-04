@@ -1,9 +1,3 @@
-export const createResponse=(res:any,success:any=true,code:any=200,message:any="",result:any=[],error:any=false)=>{
-  return res.json({
-    success,
-    code,
-    message,
-    result,
-    error
-  })
-}
+export const createResponse = (res: any, success: boolean = true, code: number = 200, message: string = "", result: any = [], error: any = false) => {
+  return res.status(code).json({ success, code, message, result, error });
+};

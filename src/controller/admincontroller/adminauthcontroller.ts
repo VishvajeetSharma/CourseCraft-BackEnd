@@ -1,83 +1,50 @@
-import 'dotenv/config'
+import 'dotenv/config';
 import { createResponse } from "../../helpers/createResponse";
 import bcrypt from 'bcrypt';
-import { generateToken } from "../../helpers/jwt";
+import { generateAccessToken, generateRefreshToken } from "../../helpers/jwt";
 import { admin } from '../../entities/admin';
 import { adminForgetPasswordService } from "../../services/adminForgetPasswordService";
-export const adminRegister = async (req: any, res: any) => {
- try{
- const { name, email, password="Test@12345", mobile } = req.body;
-  const isExist = await admin.findOne({ where: { email: email } });
-  if (isExist) {
-    return createResponse(res, false, 400, "User already exists", [], true);
-  }else{
-    const hashedPassword=await bcrypt.hash(password,10)
-    const result= await admin.save({name,email,mobile,password:hashedPassword})
-    return createResponse(res, true, 201, "User register successfully", result, false);
-  }
- }catch(error){
- return createResponse(res, false, 500, "Internal Server Error", [], true);
- }
-};
+import { asyncHandler } from "../../helpers/asyncHandler";
 
-export const adminLogin = async (req: any, res: any) => {
-  const {email,password}=req.body;
- try{  
-    const isExist = await admin.findOne({ where: { email } });
-     if(!isExist){
-      return createResponse(res, false, 404, "Admin Not Found", [], true);
-     }else{
-         const isMatched=await bcrypt.compare(password,isExist?.password);
-         if(!isMatched){
-           return createResponse(res, false, 404, "Please enter valid password", [], true);
-         }else{
-          const payload={email:isExist?.email,id:isExist?.id}
-          const token=generateToken(payload)
-          
-           return createResponse(res, true, 200, "Login successfull",{ ...isExist,token}, false,);
-         }
-     } 
- }catch(error){
-  return createResponse(res, false, 500, "Internal Server Error", [], true);
- }
-};
+export const adminRegister = asyncHandler(async (req, res) => {
+  const { name, email, password = "Test@12345", mobile } = req.body;
+  const isExist = await admin.findOne({ where: { email } });
+  if (isExist) return createResponse(res, false, 400, "User already exists", [], true);
 
-export const adminUpdatePassword = async (req: any, res: any) => {
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const result = await admin.save({ name, email, mobile, password: hashedPassword });
+  return createResponse(res, true, 201, "User register successfully", result, false);
+});
+
+export const adminLogin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const isExist = await admin.findOne({ where: { email } });
+  if (!isExist) return createResponse(res, false, 404, "Admin Not Found", [], true);
+
+  const isMatched = await bcrypt.compare(password, isExist.password);
+  if (!isMatched) return createResponse(res, false, 401, "Please enter valid password", [], true);
+
+  const payload = { email: isExist.email, id: isExist.id };
+  const accessToken = generateAccessToken(payload);
+  const refreshToken = generateRefreshToken(payload);
+  const { password: _, ...adminData } = isExist;
+  return createResponse(res, true, 200, "Login successfull", { ...adminData, accessToken, refreshToken }, false);
+});
+
+export const adminUpdatePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const adminId = req.user.id; // Assuming from auth middleware
+  const adminUser = await admin.findOne({ where: { id: req.user.id } });
+  if (!adminUser) return createResponse(res, false, 404, "Admin not found", [], true);
 
-  try {
-    const adminUser = await admin.findOne({ where: { id: adminId } });
-    if (!adminUser) {
-      return createResponse(res, false, 404, "Admin not found", [], true);
-    }
+  const isValid = await bcrypt.compare(oldPassword, adminUser.password);
+  if (!isValid) return createResponse(res, false, 400, "Old password is incorrect", [], true);
 
-    const isOldPasswordValid = await bcrypt.compare(oldPassword, adminUser.password);
-    if (!isOldPasswordValid) {
-      return createResponse(res, false, 400, "Old password is incorrect", [], true);
-    }
+  adminUser.password = await bcrypt.hash(newPassword, 10);
+  await adminUser.save();
+  return createResponse(res, true, 200, "Password updated successfully", [], false);
+});
 
-    const hashedNewPassword = await bcrypt.hash(newPassword, 10);
-    adminUser.password = hashedNewPassword;
-    await adminUser.save();
-
-    return createResponse(res, true, 200, "Password updated successfully", [], false);
-  } catch (error) {
-    return createResponse(res, false, 500, "Internal Server Error", [], true);
-  }
-};
-
-export const adminForgetPassword = async (req: any, res: any) => {
-  const { email } = req.body;
-  
-  const result = await adminForgetPasswordService(email);
-  
-  return createResponse(
-    res,
-    result.success,
-    result.status,
-    result.message,
-    [],
-    !result.success
-  );
-};
+export const adminForgetPassword = asyncHandler(async (req, res) => {
+  const result = await adminForgetPasswordService(req.body.email);
+  return createResponse(res, result.success, result.status, result.message, [], !result.success);
+});
