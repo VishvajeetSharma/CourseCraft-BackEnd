@@ -20,22 +20,19 @@ export const AppDataSource = new DataSource({
   type: "postgres",
   url: process.env.DATABASE_URL,
 
-  // 🔒 Required for Supabase
   ssl: {
     rejectUnauthorized: false,
-  },   
- 
-  // ⚙️ Environment-based config
-  synchronize: process.env.NODE_ENV !== "production",
-  logging: process.env.NODE_ENV === "development",
-
-  // 📁 Paths
-  entities: ["src/entities/**/*.ts"],
-  migrations: ["src/migrations/**/*.ts"],
-
-  // 🚀 Extra (recommended)
-  extra: {
-    max: 10, // connection pool size
-    family: 4,
   },
-}); 
+
+  synchronize: false, // ❗ production me always false
+  logging: false,
+
+  // ❗ Render me build ke baad dist use hota hai
+  entities: ["dist/entities/**/*.js"],
+  migrations: ["dist/migrations/**/*.js"],
+
+  extra: {
+    max: 3,          // 🔥 reduce connections (Supabase free tier)
+    family: 4,       // 🔥 force IPv4 (fix ENETUNREACH)
+  },
+});
