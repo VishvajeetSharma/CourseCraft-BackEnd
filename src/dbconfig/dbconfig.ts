@@ -1,43 +1,26 @@
 import 'dotenv/config'
+import path from "path";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-
-const isProduction = process.env.NODE_ENV === "production";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
 
-  // 🔀 Auto switch: Local vs Production
-  ...(isProduction
-    ? {
-        url: process.env.DATABASE_URL, // 🌍 Render / Cloud DB
-        ssl: {
-          rejectUnauthorized: false,
-        },
-      }
-    : {
-        host: process.env.DB_HOST,
-        port: Number(process.env.DB_PORT) || 5432,
-        username: process.env.DB_USER,
-        password: process.env.DB_PASSWORD,
-        database: process.env.DB_NAME,
-      }),
+  url: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
 
-  synchronize: false, // ❗ kabhi true nahi in production
-  logging: !isProduction,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 5432,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 
-  // 📁 Paths auto switch
-  entities: isProduction
-    ? ["dist/entities/**/*.js"]
-    : ["src/entities/**/*.ts"],
+  synchronize: false,
+  logging: process.env.NODE_ENV !== "production",
 
-  migrations: isProduction
-    ? ["dist/migrations/**/*.js"]
-    : ["src/migrations/**/*.ts"],
+  entities: [path.join(__dirname, "../entities/**/*.{js,ts}")],
+  migrations: [path.join(__dirname, "../migrations/**/*.{js,ts}")],
+  subscribers: [path.join(__dirname, "../subscribers/**/*.{js,ts}")],
 
-  subscribers: isProduction
-    ? ["dist/subscribers/**/*.js"]
-    : ["src/subscribers/**/*.ts"],
-
-  migrationsRun: true, // 🚀 auto run migrations
+  migrationsRun: true,
 });
