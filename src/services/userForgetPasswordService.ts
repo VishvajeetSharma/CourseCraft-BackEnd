@@ -2,10 +2,12 @@ import { users } from "../entities/user";
 import bcrypt from "bcrypt";
 import { sendEmail } from "../helpers/emailConfig";
 import { generateSecurePassword } from "../helpers/passwordGenerator";
+import { AppDataSource } from "../dbconfig/dbconfig";
 
 export const forgetPasswordService = async (email: string) => {
   try {
-    const user = await users.findOne({ where: { email } });
+    const userRepository = AppDataSource.getRepository(users);
+    const user = await userRepository.findOne({ where: { email } });
     if (!user) {
       return {
         success: false,
@@ -65,7 +67,7 @@ export const forgetPasswordService = async (email: string) => {
     }
 
     user.password = hashedPassword;
-    await user.save();
+    await userRepository.save(user);
 
     return {
       success: true,

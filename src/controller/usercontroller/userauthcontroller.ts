@@ -6,20 +6,23 @@ import { generateAccessToken, generateRefreshToken } from "../../helpers/jwt";
 import { forgetPasswordService } from "../../services/userForgetPasswordService";
 import { uploadFile } from "../../helpers/fileUpload";
 import { asyncHandler } from "../../helpers/asyncHandler";
+import { AppDataSource } from "../../dbconfig/dbconfig";
 
 export const userRegister = asyncHandler(async (req, res) => {
   const { name, email, password = "Test@12345", mobile } = req.body;
-  const isExist = await users.findOne({ where: { email } });
+  const userRepository = AppDataSource.getRepository(users);
+  const isExist = await userRepository.findOne({ where: { email } });
   if (isExist) return createResponse(res, false, 400, "User already exists", [], true);
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  const result = await users.save({ name, email, mobile, password: hashedPassword });
+  const result = await userRepository.save({ name, email, mobile, password: hashedPassword });
   return createResponse(res, true, 201, "User register successfully", result, false);
 });
 
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const isExist = await users.findOne({ where: { email } });
+  const userRepository = AppDataSource.getRepository(users);
+  const isExist = await userRepository.findOne({ where: { email } });
   if (!isExist) return createResponse(res, false, 404, "User Not Found", [], true);
 
   const isMatched = await bcrypt.compare(password, isExist.password);
@@ -39,22 +42,24 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
 
 export const userUpdatePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const user = await users.findOne({ where: { id: req.user.id } });
+  const userRepository = AppDataSource.getRepository(users);
+  const user = await userRepository.findOne({ where: { id: req.user.id } });
   if (!user) return createResponse(res, false, 404, "User not found", [], true);
 
   const isValid = await bcrypt.compare(oldPassword, user.password);
   if (!isValid) return createResponse(res, false, 400, "Old password is incorrect", [], true);
 
   user.password = await bcrypt.hash(newPassword, 10);
-  await user.save();
+  await userRepository.save(user);
   return createResponse(res, true, 200, "Password updated successfully", [], false);
 });
 
 export const userUpdateProfile = asyncHandler(async (req, res) => {
   const { name, email, mobile, address } = req.body;
   const userId = req.user.id;
+  const userRepository = AppDataSource.getRepository(users);
 
-  const user = await users.findOne({ where: { id: userId } });
+  const user = await userRepository.findOne({ where: { id: userId } });
   if (!user) return createResponse(res, false, 404, "User not found", [], true);
 
   let profileName = user.profile;
@@ -62,7 +67,7 @@ export const userUpdateProfile = asyncHandler(async (req, res) => {
     profileName = await uploadFile(req.files.profile, "uploads");
   }
 
-  await users.update({ id: userId }, { name, email, mobile, address, profile: profileName });
-  const updatedUser = await users.findOne({ where: { id: userId } });
+  await userRepository.update({ id: userId }, { name, email, mobile, address, profile: profileName });
+  const updatedUser = await userRepository.findOne({ where: { id: userId } });
   return createResponse(res, true, 200, "Profile updated successfully", updatedUser, false);
 });
