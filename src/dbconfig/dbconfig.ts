@@ -7,7 +7,7 @@ export const AppDataSource = new DataSource({
   type: "postgres",
 
   url: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+  ssl: process.env.NODE_ENV !== "production" ? { rejectUnauthorized: false } : undefined,
 
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT) || 5432,
@@ -16,7 +16,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
 
   synchronize: false,
-  logging: process.env.NODE_ENV !== "production",
+  logging: process.env.NODE_ENV === "production",
 
   entities: [path.join(__dirname, "../entities/**/*.{js,ts}")],
   migrations: [path.join(__dirname, "../migrations/**/*.{js,ts}")],
