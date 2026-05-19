@@ -1,19 +1,19 @@
-import { course } from "../../entities/course";
-import { mastercourse } from "../../entities/mastercourse";
-import { masterplan } from "../../entities/masterplan";
-import { plan } from "../../entities/plan";
-import { users } from "../../entities/user";
+import { Course } from "../../entities/course";
+import { MasterCourse } from "../../entities/mastercourse";
+import { MasterPlan } from "../../entities/masterplan";
+import { Plan } from "../../entities/plan";
+import { Users } from "../../entities/user";
 import { createResponse } from "../../helpers/createResponse";
 import { asyncHandler } from "../../helpers/asyncHandler";
 import { AppDataSource } from "../../dbconfig/dbconfig";
 
 export const getUserDashboardStats = asyncHandler(async (req, res) => {
   const user_Id = req.user.id;
-  const userRepository = AppDataSource.getRepository(users);
-  const planRepository = AppDataSource.getRepository(plan);
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
-  const courseRepository = AppDataSource.getRepository(course);
+  const userRepository = AppDataSource.getRepository(Users);
+  const planRepository = AppDataSource.getRepository(Plan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
+  const courseRepository = AppDataSource.getRepository(Course);
 
   const [userData, totalPlans, purchasedPlans, totalCourses, userCourses] = await Promise.all([
     userRepository.findOne({ where: { id: user_Id } }),
@@ -40,9 +40,9 @@ export const getUserDashboardStats = asyncHandler(async (req, res) => {
 export const userPurchasePlan = asyncHandler(async (req, res) => {
   const { plan_id } = req.body;
   const user_id = req.user.id;
-  const planRepository = AppDataSource.getRepository(plan);
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
-  const userRepository = AppDataSource.getRepository(users);
+  const planRepository = AppDataSource.getRepository(Plan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
+  const userRepository = AppDataSource.getRepository(Users);
 
   await planRepository.save({ user_id, plan_id });
 
@@ -51,16 +51,16 @@ export const userPurchasePlan = asyncHandler(async (req, res) => {
     userRepository.findOne({ where: { id: user_id } }),
   ]);
 
-  const finalCredit = parseInt(masterplanRes?.credit) + parseInt(userRes?.credit);
+  const finalCredit = (masterplanRes?.credit ?? 0) + (userRes?.credit ?? 0);
   await userRepository.update({ id: user_id }, { credit: finalCredit } as any);
   return createResponse(res, true, 200, "Plan purchased successfully", { credit: finalCredit }, false);
 });
 
 export const userPurchasedPlan = asyncHandler(async (req, res) => {
   const user_id = req.user.id;
-  const planRepository = AppDataSource.getRepository(plan);
+  const planRepository = AppDataSource.getRepository(Plan);
   const data = await planRepository.createQueryBuilder("plan")
-    .leftJoinAndSelect(masterplan, "mp", "mp.id = plan.plan_id")
+    .leftJoinAndSelect(MasterPlan, "mp", "mp.id = plan.plan_id")
     .where("plan.user_id = :user_id", { user_id })
     .getRawMany();
 
@@ -69,9 +69,9 @@ export const userPurchasedPlan = asyncHandler(async (req, res) => {
 
 export const userViewCourse = asyncHandler(async (req, res) => {
   const user_id = req.user.id;
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const user = await userRepository.findOne({ where: { id: user_id } });
-  const remainingCredit = parseInt(user?.credit);
+  const remainingCredit = user?.credit ?? 0;
 
   if (remainingCredit <= 0) {
     return createResponse(res, false, 400, "Insufficient credit, please purchase a plan", [], true);

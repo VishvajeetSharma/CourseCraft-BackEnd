@@ -2,14 +2,14 @@ import 'dotenv/config';
 import { createResponse } from "../../helpers/createResponse";
 import bcrypt from 'bcrypt';
 import { generateAccessToken, generateRefreshToken } from "../../helpers/jwt";
-import { admin } from '../../entities/admin';
+import { Admin } from '../../entities/admin';
 import { adminForgetPasswordService } from "../../services/adminForgetPasswordService";
 import { asyncHandler } from "../../helpers/asyncHandler";
 import { AppDataSource } from "../../dbconfig/dbconfig";
 
 export const adminRegister = asyncHandler(async (req, res) => {
   const { name, email, password = "Test@12345", mobile } = req.body;
-  const adminRepository = AppDataSource.getRepository(admin);
+  const adminRepository = AppDataSource.getRepository(Admin);
   const isExist = await adminRepository.findOne({ where: { email } });
   if (isExist) return createResponse(res, false, 400, "User already exists", [], true);
 
@@ -20,7 +20,7 @@ export const adminRegister = asyncHandler(async (req, res) => {
 
 export const adminLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const adminRepository = AppDataSource.getRepository(admin);
+  const adminRepository = AppDataSource.getRepository(Admin);
   const isExist = await adminRepository.findOne({ where: { email } });
   if (!isExist) return createResponse(res, false, 404, "Admin Not Found", [], true);
 
@@ -36,7 +36,7 @@ export const adminLogin = asyncHandler(async (req, res) => {
 
 export const adminUpdatePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const adminRepository = AppDataSource.getRepository(admin);
+  const adminRepository = AppDataSource.getRepository(Admin);
   const adminUser = await adminRepository.findOne({ where: { id: req.user.id } });
   if (!adminUser) return createResponse(res, false, 404, "Admin not found", [], true);
 

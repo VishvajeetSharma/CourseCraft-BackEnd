@@ -1,4 +1,4 @@
-import { users } from "../../entities/user";
+import { Users } from "../../entities/user";
 import "dotenv/config";
 import { createResponse } from "../../helpers/createResponse";
 import bcrypt from "bcrypt";
@@ -10,7 +10,7 @@ import { AppDataSource } from "../../dbconfig/dbconfig";
 
 export const userRegister = asyncHandler(async (req, res) => {
   const { name, email, password = "Test@12345", mobile } = req.body;
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const isExist = await userRepository.findOne({ where: { email } });
   if (isExist) return createResponse(res, false, 400, "User already exists", [], true);
 
@@ -21,7 +21,7 @@ export const userRegister = asyncHandler(async (req, res) => {
 
 export const userLogin = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const isExist = await userRepository.findOne({ where: { email } });
   if (!isExist) return createResponse(res, false, 404, "User Not Found", [], true);
 
@@ -42,7 +42,7 @@ export const userForgetPassword = asyncHandler(async (req, res) => {
 
 export const userUpdatePassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const user = await userRepository.findOne({ where: { id: req.user.id } });
   if (!user) return createResponse(res, false, 404, "User not found", [], true);
 
@@ -57,7 +57,7 @@ export const userUpdatePassword = asyncHandler(async (req, res) => {
 export const userUpdateProfile = asyncHandler(async (req, res) => {
   const { name, email, mobile, address } = req.body;
   const userId = req.user.id;
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
 
   const user = await userRepository.findOne({ where: { id: userId } });
   if (!user) return createResponse(res, false, 404, "User not found", [], true);

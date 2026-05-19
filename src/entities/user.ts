@@ -1,41 +1,44 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "users" })
-export class users extends BaseEntity {
-    @PrimaryGeneratedColumn({ name: "id" })
-    id: any
+export class Users {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-    @Column({ name: "name", type: 'varchar', length: 255, nullable: true })
-    name: any
+  @Column({ nullable: true })
+  name!: string;
 
-    @Column({ name: "email", type: 'varchar', length: 255, unique: true })
-    email: any
+  @Column({ unique: true })
+  email!: string;
 
-    @Column({ name: "password", type: 'varchar', length: 255, nullable: true })
-    password: any
+  @Column({ nullable: true })
+  password!: string;
 
-    @Column({ name: "mobile", type: 'varchar', length: 255, nullable: true })
-    mobile: any
+  @Column({ nullable: true })
+  mobile!: string;
 
-    @Column({ name: "profile", type: 'varchar', length: 255, nullable: true })
-    profile: any
+  @Column({ nullable: true })
+  profile!: string;
 
-    @Column({ name: "address", type: 'varchar', length: 255, nullable: true })
-    address: any
+  @Column({ nullable: true })
+  address!: string;
 
-    @Column({ name: "credit", type: 'int', default: 3 })
-    credit: any
+  @Column({ type: "int", default: 3 })
+  credit!: number;
 
-    @Column({ name: "otp", type: 'varchar',nullable:true })
-    otp: any
+  @Column({ nullable: true })
+  otp!: string;
 
-     @Column({ name: "status", type: 'int', default:1})
-    status: any  
-    
-    @Column({ name: "created_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    created_at: any;
+  @Column({ type: "int", default: 1 })
+  status!: number;
 
-    @Column({ name: "updated_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    updated_at: any;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  updated_at!: Date;
 }

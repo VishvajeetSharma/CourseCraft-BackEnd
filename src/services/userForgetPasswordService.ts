@@ -1,4 +1,4 @@
-import { users } from "../entities/user";
+import { Users } from "../entities/user";
 import bcrypt from "bcrypt";
 import { sendEmail } from "../helpers/emailConfig";
 import { generateSecurePassword } from "../helpers/passwordGenerator";
@@ -6,7 +6,7 @@ import { AppDataSource } from "../dbconfig/dbconfig";
 
 export const forgetPasswordService = async (email: string) => {
   try {
-    const userRepository = AppDataSource.getRepository(users);
+    const userRepository = AppDataSource.getRepository(Users);
     const user = await userRepository.findOne({ where: { email } });
     if (!user) {
       return {

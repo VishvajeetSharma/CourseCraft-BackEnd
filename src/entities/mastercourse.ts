@@ -1,48 +1,44 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "mastercourse" })
-export class mastercourse extends BaseEntity {
-  @PrimaryGeneratedColumn({ name: "id" })
-  id: any;
+export class MasterCourse {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-  @Column({ name: "thumbnail", type: "varchar", length: 255, nullable: true })
-  thumbnail: any;
+  @Column({ nullable: true })
+  thumbnail!: string;
 
-  @Column({ name: "title", type: "varchar", length: 255, nullable: true })
-  title: any;
+  @Column({ nullable: true })
+  title!: string;
 
-  @Column({ name: "desc", type: "varchar", length: 255, nullable: true })
-  desc: any;
-  
-  @Column({ name: "level", type: "varchar", length: 255, nullable: true })
-  level: any;
+  @Column({ nullable: true })
+  desc!: string;
 
-  @Column({ name: "rating", type: "varchar", length: 255, nullable: true })
-  rating: any;
+  @Column({ nullable: true })
+  level!: string;
 
-  @Column({ name: "duration", type: "varchar", length: 255, nullable: true })
-  duration: any;
+  @Column({ nullable: true })
+  rating!: string;
 
-  @Column({ name: "type", type: "varchar", length: 255, nullable: true })
-  type: any;
+  @Column({ nullable: true })
+  duration!: string;
 
-  @Column({ name: "content", type: "varchar", length: 255, nullable: true })
-  content: any;
+  @Column({ nullable: true })
+  type!: string;
 
-  @Column({ name: "status", type: "int", default: 1 })
-  status: any;
+  @Column({ nullable: true })
+  content!: string;
 
-  @Column({
-    name: "created_at",
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-  })
-  created_at: any;
+  @Column({ type: "int", default: 1 })
+  status!: number;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
   @Column({
-    name: "updated_at",
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
   })
-  updated_at: any;
+  updated_at!: Date;
 }

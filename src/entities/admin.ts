@@ -1,36 +1,41 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "admin" })
-export class admin extends BaseEntity {
-    @PrimaryGeneratedColumn({ name: "id" })
-    id: any
+export class Admin {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-    @Column({ name: "name", type: 'varchar', length: 255, nullable: true })
-    name: any
+  @Column({ nullable: true })
+  name!: string;
 
-    @Column({ name: "email", type: 'varchar', length: 255, nullable: true })
-    email: any
-    @Column({ name: "password", type: 'varchar', length: 255, nullable: true })
-    password: any
-    @Column({ name: "mobile", type: 'varchar', length: 255, nullable: true })
-    mobile: any
+  @Column({ nullable: true })
+  email!: string;
 
-    @Column({ name: "profile", type: 'varchar', length: 255, nullable: true })
-    profile: any
+  @Column({ nullable: true })
+  password!: string;
 
-    @Column({ name: "address", type: 'varchar', length: 255, nullable: true })
-    address: any
+  @Column({ nullable: true })
+  mobile!: string;
 
-    @Column({ name: "otp", type: 'varchar', nullable: true })
-    otp: any
+  @Column({ nullable: true })
+  profile!: string;
 
-     @Column({ name: "status", type: 'int', default:1})
-    status: any  
-    
-    @Column({ name: "created_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    created_at: any;
+  @Column({ nullable: true })
+  address!: string;
 
-    @Column({ name: "updated_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    updated_at: any;
+  @Column({ nullable: true })
+  otp!: string;
 
+  @Column({ type: "int", default: 1 })
+  status!: number;
+
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
+
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  updated_at!: Date;
 }

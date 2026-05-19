@@ -1,4 +1,4 @@
-import { admin } from "../entities/admin";
+import { Admin } from "../entities/admin";
 import bcrypt from "bcrypt";
 import { sendEmail } from "../helpers/emailConfig";
 import { generateSecurePassword } from "../helpers/passwordGenerator";
@@ -6,7 +6,7 @@ import { AppDataSource } from "../dbconfig/dbconfig";
 
 export const adminForgetPasswordService = async (email: string) => {
   try {
-    const adminRepository = AppDataSource.getRepository(admin);
+    const adminRepository = AppDataSource.getRepository(Admin);
     const adminUser = await adminRepository.findOne({ where: { email } });
     if (!adminUser) {
       return {

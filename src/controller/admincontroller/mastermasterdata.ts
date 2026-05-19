@@ -1,6 +1,6 @@
-import { mastercourse } from "../../entities/mastercourse";
-import { masterplan } from "../../entities/masterplan";
-import { users } from "../../entities/user";
+import { MasterCourse } from "../../entities/mastercourse";
+import { MasterPlan } from "../../entities/masterplan";
+import { Users } from "../../entities/user";
 import { createResponse } from "../../helpers/createResponse";
 import { uploadFile } from "../../helpers/fileUpload";
 import { asyncHandler } from "../../helpers/asyncHandler";
@@ -9,7 +9,7 @@ import { AppDataSource } from "../../dbconfig/dbconfig";
 // Master Plans
 export const createmasterplan = asyncHandler(async (req, res) => {
   const { name, desc, credit, price, offer, duration, is_rec, status } = req.body;
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
   const isExist = await masterplanRepository.findOne({ where: { name } });
   if (isExist) return createResponse(res, false, 400, "Plan already exists", [], true);
 
@@ -18,13 +18,13 @@ export const createmasterplan = asyncHandler(async (req, res) => {
 });
 
 export const getmasterplan = asyncHandler(async (_req, res) => {
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
   const result = await masterplanRepository.find({ order: { created_at: "DESC" } });
   return createResponse(res, true, 200, "Plans fetched successfully", result, false);
 });
 
 export const getmasterplanbyid = asyncHandler(async (req, res) => {
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
   const result = await masterplanRepository.findOne({ where: { id: req.params.id } });
   if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
   return createResponse(res, true, 200, "Plan fetched successfully", result, false);
@@ -32,7 +32,7 @@ export const getmasterplanbyid = asyncHandler(async (req, res) => {
 
 export const updatemasterplan = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
   const result = await masterplanRepository.findOne({ where: { id } });
   if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
 
@@ -43,7 +43,7 @@ export const updatemasterplan = asyncHandler(async (req, res) => {
 });
 
 export const deletemasterplan = asyncHandler(async (req, res) => {
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
   const result = await masterplanRepository.findOne({ where: { id: req.params.id } });
   if (!result) return createResponse(res, false, 404, "Plan not found", [], true);
 
@@ -59,7 +59,7 @@ export const createmastercourse = asyncHandler(async (req, res) => {
     return createResponse(res, false, 400, "Thumbnail and Content required", [], true);
   }
 
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const isExist = await mastercourseRepository.findOne({ where: { title } });
   if (isExist) return createResponse(res, false, 400, "Course already exists", [], true);
 
@@ -73,13 +73,13 @@ export const createmastercourse = asyncHandler(async (req, res) => {
 });
 
 export const getmastercourse = asyncHandler(async (_req, res) => {
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const result = await mastercourseRepository.find({ order: { created_at: "DESC" } });
   return createResponse(res, true, 200, "Courses fetched successfully", result, false);
 });
 
 export const getmastercoursebyid = asyncHandler(async (req, res) => {
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const result = await mastercourseRepository.findOne({ where: { id: req.params.id } });
   if (!result) return createResponse(res, false, 404, "Course not found", [], true);
   return createResponse(res, true, 200, "Course fetched successfully", result, false);
@@ -87,7 +87,7 @@ export const getmastercoursebyid = asyncHandler(async (req, res) => {
 
 export const updatemastercourse = asyncHandler(async (req, res) => {
   const { id } = req.params;
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const result = await mastercourseRepository.findOne({ where: { id } });
   if (!result) return createResponse(res, false, 404, "Course not found", [], true);
 
@@ -104,7 +104,7 @@ export const updatemastercourse = asyncHandler(async (req, res) => {
 });
 
 export const deletemastercourse = asyncHandler(async (req, res) => {
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const result = await mastercourseRepository.findOne({ where: { id: req.params.id } });
   if (!result) return createResponse(res, false, 404, "Course not found", [], true);
 
@@ -114,13 +114,13 @@ export const deletemastercourse = asyncHandler(async (req, res) => {
 
 // Users
 export const getUsers = asyncHandler(async (_req, res) => {
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const result = await userRepository.find({ order: { created_at: "DESC" } });
   return createResponse(res, true, 200, "Users fetched successfully", result, false);
 });
 
 export const deleteUser = asyncHandler(async (req, res) => {
-  const userRepository = AppDataSource.getRepository(users);
+  const userRepository = AppDataSource.getRepository(Users);
   const result = await userRepository.findOne({ where: { id: req.params.id } });
   if (!result) return createResponse(res, false, 404, "User not found", [], true);
 
@@ -129,9 +129,9 @@ export const deleteUser = asyncHandler(async (req, res) => {
 });
 
 export const getDashboardStats = asyncHandler(async (_req, res) => {
-  const userRepository = AppDataSource.getRepository(users);
-  const masterplanRepository = AppDataSource.getRepository(masterplan);
-  const mastercourseRepository = AppDataSource.getRepository(mastercourse);
+  const userRepository = AppDataSource.getRepository(Users);
+  const masterplanRepository = AppDataSource.getRepository(MasterPlan);
+  const mastercourseRepository = AppDataSource.getRepository(MasterCourse);
   const [totalUsers, activeUsers, totalPlans, activePlans, totalCourses, activeCourses] = await Promise.all([
     userRepository.count(),
     userRepository.count({ where: { status: 1 } }),

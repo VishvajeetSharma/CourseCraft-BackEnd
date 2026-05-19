@@ -1,46 +1,41 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "masterplan" })
-export class masterplan extends BaseEntity {
-  @PrimaryGeneratedColumn({ name: "id" })
-  id: any;
+export class MasterPlan {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-  @Column({ name: "name", type: "varchar", length: 255, nullable: true })
-  name: any;
+  @Column({ nullable: true })
+  name!: string;
 
-  @Column({ name: "desc", type: "varchar", length: 255, nullable: true })
-  desc: any;
+  @Column({ nullable: true })
+  desc!: string;
 
-  @Column({ name: "credit", type: "int", nullable: true })
-  credit: any;
+  @Column({ type: "int", nullable: true })
+  credit!: number;
 
-  @Column({ name: "price", type: "int", nullable: true })
-  price: any;
+  @Column({ type: "int", nullable: true })
+  price!: number;
 
+  @Column({ type: "int", nullable: true })
+  offer!: number;
 
-  @Column({ name: "offer", type: "int", nullable: true })
-  offer: any;
+  @Column({ type: "int", nullable: true })
+  duration!: number;
 
-  @Column({ name: "duration", type: "int", nullable: true })
-  duration: any;
+  @Column({ type: "int", default: 0 })
+  is_rec!: number;
 
-  
-  @Column({ name: "is_rec", type: "int", default:0 })
-  is_rec: any; 
-  @Column({ name: "status", type: "int", default: 1 })
-  status: any;
+  @Column({ type: "int", default: 1 })
+  status!: number;
 
-  @Column({
-    name: "created_at",
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-  })
-  created_at: any;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
   @Column({
-    name: "updated_at",
     type: "timestamp",
     default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
   })
-  updated_at: any;
+  updated_at!: Date;
 }

@@ -23,7 +23,8 @@ app.get("/get-image/:imageName", (req: Request, res: Response) => {
   const imageName = req.params["imageName"] as string;
   const filePath = path.join(__dirname, "../uploads", imageName);
   res.sendFile(filePath, (err) => {
-    if (err) res.status(404).json({ success: false, message: "Image not found" });
+    if (err)
+      res.status(404).json({ success: false, message: "Image not found" });
   });
 });
 
@@ -33,7 +34,9 @@ app.use("/user", userRouter);
 
 // 404 - undefined routes
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ success: false, code: 404, message: "Route not found" });
+  res
+    .status(404)
+    .json({ success: false, code: 404, message: "Route not found" });
 });
 
 // Global error handler
@@ -61,19 +64,15 @@ const PORT = process.env.PORT || 6000;
 //     process.exit(1);
 //   });
 
-
 AppDataSource.initialize()
   .then(() => {
     console.log("DB Connected");
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
+
+    app.listen(6500, () => {
+      console.log("Server running on port 6500");
+      console.log(`Swagger UI: http://localhost:${PORT}/api-docs/`);
     });
   })
   .catch((err) => {
-    console.log("DB Error:", err.message);
-    process.exit(1);
+    console.log("DB Error:", err);
   });
-
-
-
-  

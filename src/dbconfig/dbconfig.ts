@@ -1,43 +1,48 @@
-import 'dotenv/config'
+import "dotenv/config";
 import path from "path";
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 
-// export const AppDataSource = new DataSource({
-//   type: "postgres",
-
-//   host: process.env.DB_HOST,
-//   port: Number(process.env.DB_PORT) || 5432,
-//   username: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   database: process.env.DB_NAME,
-
-//   synchronize: false,
-//   logging: true,
-
-//   entities: [path.join(__dirname, "../entities/**/*.ts")],
-//   migrations: [path.join(__dirname, "../migrations/**/*.ts")],
-//   subscribers: [path.join(__dirname, "../subscribers/**/*.ts")],
-
-//   migrationsRun: true,
-// });
-
+const isDev = process.env.NODE_ENV !== "production";
 
 export const AppDataSource = new DataSource({
   type: "postgres",
 
-  url: process.env.DATABASE_URL,
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT) || 5432,
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ssl:
+    process.env.DB_SSL === "true"
+      ? { rejectUnauthorized: false }
+      : false,
 
   synchronize: false,
-  logging: false,
+  logging: true,
 
-  entities: [path.join(__dirname, "../entities/**/*.js")],
-  migrations: [path.join(__dirname, "../migrations/**/*.js")],
-  subscribers: [path.join(__dirname, "../subscribers/**/*.js")],
+  // ✅ FIXED: dev + prod support
+  entities: [
+    path.join(
+      __dirname,
+      isDev ? "../entities/**/*.ts" : "../entities/**/*.js"
+    ),
+  ],
+
+  migrations: [
+    path.join(
+      __dirname,
+      isDev ? "../migrations/**/*.ts" : "../migrations/**/*.js"
+    ),
+  ],
+
+  subscribers: [
+    path.join(
+      __dirname,
+      isDev ? "../subscribers/**/*.ts" : "../subscribers/**/*.js"
+    ),
+  ],
 
   migrationsRun: true,
 });

@@ -1,7 +1,7 @@
 const swaggerOptions = {
   openapi: "3.0.0",
   info: {
-    title: "Learning Platform API",
+    title: "CoursCraft API",
     version: "1.0.0",
     description: "API documentation for learning platform",
   },

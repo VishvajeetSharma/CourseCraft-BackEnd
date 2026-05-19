@@ -1,23 +1,26 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "course" })
-export class course extends BaseEntity {
-    @PrimaryGeneratedColumn({ name: "id" })
-    id: any
+export class Course {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-    @Column({ name: "course_id", type: 'int' })
-    course_id: any
+  @Column({ type: "int" })
+  course_id!: number;
 
-    @Column({ name: "user_id", type: 'int', })
-    user_id: any
-    
-    @Column({ name: "status", type: 'int', default: 1 })
-    status: any
+  @Column({ type: "int" })
+  user_id!: number;
 
-    @Column({ name: "created_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    created_at: any;
+  @Column({ type: "int", default: 1 })
+  status!: number;
 
-    @Column({ name: "updated_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    updated_at: any;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
-}  
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  updated_at!: Date;
+}

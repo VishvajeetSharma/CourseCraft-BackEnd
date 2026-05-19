@@ -1,29 +1,32 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity({ name: "contactus" })
-export class contactus extends BaseEntity {
-    @PrimaryGeneratedColumn({ name: "id" })
-    id: any
+export class Contactus {
+  @PrimaryGeneratedColumn()
+  id!: number;
 
-    @Column({ name: "name", type: 'varchar', length: 255, nullable: true })
-    name: any
+  @Column({ nullable: true })
+  name!: string;
 
-    @Column({ name: "email", type: 'varchar', length: 255, unique: true })
-    email: any
+  @Column({ unique: true })
+  email!: string;
 
-    @Column({ name: "mobile", type: 'varchar', length: 255, nullable: true })
-    mobile: any
+  @Column({ nullable: true })
+  mobile!: string;
 
-    @Column({ name: "subject", type: 'varchar', length: 255, nullable: true })
-    subject: any
+  @Column({ nullable: true })
+  subject!: string;
 
-    @Column({ name: "des", type: 'varchar', length: 255, nullable: true })
-    des: any
+  @Column({ nullable: true })
+  des!: string;
 
-    @Column({ name: "created_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    created_at: any;
+  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+  created_at!: Date;
 
-    @Column({ name: "updated_at", type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-    updated_at: any;
-
+  @Column({
+    type: "timestamp",
+    default: () => "CURRENT_TIMESTAMP",
+    onUpdate: "CURRENT_TIMESTAMP",
+  })
+  updated_at!: Date;
 }
