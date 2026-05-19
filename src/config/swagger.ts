@@ -7,7 +7,8 @@ const swaggerOptions = {
   },
   servers: [
     {
-      url: "http://localhost:6500",
+      // url: "http://localhost:6500",
+      url: "https://coursecraft-backend-169v.onrender.com",
       description: "Development server",
     },
   ],
